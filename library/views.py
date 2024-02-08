@@ -1,13 +1,11 @@
 from django.shortcuts import render
 from django.db.models import Q
-from django_filters import rest_framework as filters
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAdminUser
 from rest_framework import generics, filters, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
-from django_filters.rest_framework import DjangoFilterBackend
 from django.forms.models import model_to_dict
 
 from .models import Book, User, Tracking, Author, Genre, Notes
@@ -40,11 +38,6 @@ class BookList(generics.ListCreateAPIView):
         title = request.data.get("title")
         book = Book.objects.create(
             author=author, title=title)
-        # genres = request.data.get("genre", [])
-        # for genre_name in genres:
-        #     genre = Genre.objects.get_or_create(genre_name=genre_name)
-        #     book.genre.add(genre)
-
         book_serializer = BookSerializer(book)
         return Response(book_serializer.data)
 
@@ -118,53 +111,3 @@ class NoteList(generics.ListAPIView):
             return Notes.objects.filter(Q(user=user) | Q(is_public=True))
         else:
             return Notes.objects.filter(is_public=True)
-
-
-# -----------------------------------------------------------------
-# class NoteList(generics.ListAPIView):
-#     serializer_class = NoteSerializer
-#     filter_backends = [DjangoFilterBackend]
-#     # filterset_fields = ['is_public']
-
-#     def get_queryset(self):
-#         user_id = self.request.user.id
-#         queryset = Notes.objects.filter(user_id=user_id)
-#         return queryset
-
-
-# @api_view(["GET"])
-# def book_notes(request):
-#     # Get the notes for the specified book ID
-#     notes = Notes.objects.order_by("-created_at")
-
-#     # Filter out private notes that were not created by the current user
-#     if not request.user.is_authenticated:
-#         notes = notes.filter(is_public=True)
-#     else:
-#         notes = notes.filter(Q(is_public=True) | Q(user=request.user))
-
-#     # Serialize the notes and return them in the response
-#     serializer = NoteSerializer(notes, many=True)
-#     return Response(serializer.data)
-
-
-# @api_view(["POST"])
-# def create_note(request):
-#     # Get the book and user IDs from the request data
-#     book_id = request.data.get("book_id")
-#     user_id = request.data.get("user_id")
-
-#     # Create a new Note object
-#     note = Note(
-#         book_id=book_id,
-#         user_id=user_id,
-#         note_body=request.data.get("note_body"),
-#         is_public=request.data.get("is_public"),
-#         page_number=request.data.get("page_number")
-#     )
-#     # Save the note to the database
-#     note.save()
-
-#     # Serialize the note and return it in the response
-#     serializer = NoteSerializer(note)
-#     return Response(serializer.data, status=status.HTTP_201_CREATED)
