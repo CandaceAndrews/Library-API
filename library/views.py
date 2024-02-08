@@ -1,4 +1,4 @@
-from django.shortcuts import render
+
 from django.db.models import Q
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAdminUser
@@ -6,7 +6,7 @@ from rest_framework import generics, filters, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
-from django.forms.models import model_to_dict
+from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import Book, User, Tracking, Author, Genre, Notes
 from .serializers import BookSerializer, UserSerializer, TrackingSerializer, AuthorSerializer, GenreSerializer, NoteSerializer
@@ -38,6 +38,7 @@ class BookList(generics.ListCreateAPIView):
         title = request.data.get("title")
         book = Book.objects.create(
             author=author, title=title)
+
         book_serializer = BookSerializer(book)
         return Response(book_serializer.data)
 
